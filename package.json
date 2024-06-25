@@ -2,6 +2,10 @@
   "name": "dymcnrunner",
   "version": "1.0.0",
   "description": "DyMcn执行器",
+  "author": {
+    "name": "DaYa",
+    "email": "daya@daya.com"
+  },
   "main": "app.js",
   "scripts": {
     "start": "electron .",
