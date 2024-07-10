@@ -1,7 +1,5 @@
 const { app, BrowserWindow } = require('electron');
 const minimist = require('minimist');
-const path = require('path');
-const fs = require('fs');
 
 // 从命令行参数获取网页地址、cookie和超时时间
 const args = minimist(process.argv.slice(2));
@@ -19,31 +17,17 @@ const minShowTime = parseInt(args['min-show-time'] || 0, 10); // 最小显示时
 const userAgent = args.useragent || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'; // 默认用户代理
 const cookies = JSON.parse(cookiesJson);
 
-// 生成随机用户数据目录
-function createRandomUserDataDir() {
-    const baseUserDataPath = app.getPath('userData');
-    const randomDir = path.join(baseUserDataPath, `session_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`);
-    fs.mkdirSync(randomDir, { recursive: true });
-    return randomDir;
-}
-
 function createWindow() {
     if (!showWindow) {
         app.dock.hide();
     }
-
-    // 使用随机用户数据目录
-    const userDataDir = createRandomUserDataDir();
-    const session = require('electron').session.fromPartition(`persist:${userDataDir}`);
-
     let win = new BrowserWindow({
         width: 800,
         height: 600,
         show: !!showWindow, // 控制窗口是否显示
         webPreferences: {
             nodeIntegration: true,
-            contextIsolation: false,
-            session: session
+            contextIsolation: false
         }
     });
 
@@ -57,7 +41,7 @@ function createWindow() {
         const cookieUrl = `http${cookie.secure ? 's' : ''}://${domain}${cookie.path}`;
         const fullCookie = { ...cookie, url: cookieUrl };
 
-        return session.cookies.set(fullCookie).then(() => {
+        return win.webContents.session.cookies.set(fullCookie).then(() => {
             // console.log('Cookie successfully set:', fullCookie);
         }).catch(error => {
             // console.log("fullCookie:", fullCookie);
